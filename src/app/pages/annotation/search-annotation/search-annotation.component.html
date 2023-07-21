@@ -1,0 +1,24 @@
+<mat-progress-bar *ngIf="isLoading" class="example-margin" color="accent" mode="indeterminate" value="50">
+</mat-progress-bar>
+
+<app-list-annotations 
+    *ngIf="annotations" 
+    titleList="Search Annotation" 
+    [annotations]="annotations"
+    (updateAnnotation)="updateAnnotation($event)"
+>
+</app-list-annotations>
+<button 
+    *ngIf="!(paginationAnnotations.pageNumber === paginationAnnotations.totalPages)" 
+    (click)="getAnnotations(paginationAnnotations.pageNumber+1)" 
+    mat-button 
+    color="primary"
+    title="Show more"
+    class="paginationButton"
+>
+    <mat-icon> expand_more </mat-icon>
+</button>
+
+<button (click)="openDialogAddAnnotation()" mat-fab color="primary" title="Add new annotation" class="buttonAddAnnotation">
+    <mat-icon>add</mat-icon>
+</button>

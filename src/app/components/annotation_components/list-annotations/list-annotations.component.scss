@@ -1,0 +1,20 @@
+.containerAnnotations {
+    margin: 20px;
+    margin-bottom: 30px;
+}
+
+hr {
+    border: none;
+    border-bottom: 1px solid rgba(128, 128, 128, 0.363);
+}
+
+.annotations {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    max-width: 1280px;
+
+    app-annotation-card {
+        margin: 10px;
+    }
+}

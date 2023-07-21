@@ -1,0 +1,24 @@
+<div>
+
+    <mat-dialog-content>
+        <h1>Confirm account deletion</h1>
+        <p>By deleting this account, all your data will be permanently removed. Do you want to continue?</p>
+    </mat-dialog-content>
+
+    <mat-dialog-actions align="end">
+
+        <button mat-button (click)="onNoClick()">Cancel</button>
+
+        <button mat-raised-button (click)="deleteAccount()" color="warn">
+
+            <span *ngIf="!isLoading">Confirm</span>
+
+            <mat-progress-spinner *ngIf="isLoading" color="primary" style="width: 20px; height: 20px;"
+                mode="indeterminate" value="30">
+            </mat-progress-spinner>
+
+        </button>
+
+    </mat-dialog-actions>
+
+</div>

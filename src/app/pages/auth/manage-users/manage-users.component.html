@@ -1,0 +1,46 @@
+<div class="containerUsers">
+
+    <div class="headerUsers">
+        <h1>{{search? "Search for: "+search : "Users"}}</h1>
+        <input 
+            #searchUser
+            (keyup)="findUserByEmail(searchUser.value)" 
+            placeholder="Search user by email"
+            class="searchInput"
+        >
+    </div>
+
+    <div *ngFor="let user of users" class="userItem">
+
+        <div>
+            <h2>{{user.name}}</h2>
+            <p>{{user.email}}</p>
+            <small *ngFor="let role of user.roles">{{role}}, </small>
+        </div>
+
+        <button mat-icon-button [matMenuTriggerFor]="menu">
+            <mat-icon> more_vert </mat-icon>
+        </button>
+
+        <mat-menu #menu="matMenu">
+            <button mat-menu-item (click)="updateDataUser(user)">Update data</button>
+            <button mat-menu-item (click)="updatePasswordUser(user)">Update password</button>
+            <button mat-menu-item (click)="deleteUser(user.email)">Delete</button>
+        </mat-menu>
+
+    </div>
+
+    <button 
+        *ngIf="!(paginationUsers.pageNumber === paginationUsers.totalPages)" 
+        (click)="search? findUserByEmail(search, paginationUsers.pageNumber+1) : getAllUsers(paginationUsers.pageNumber+1)"      
+        mat-button 
+        color="primary"
+        title="Show more"
+        class="paginationButton"
+    >
+        <mat-icon> expand_more </mat-icon>
+    </button>
+
+    <p *ngIf="users.length == 0">Not a user</p>
+
+</div>

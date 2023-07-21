@@ -1,0 +1,32 @@
+<form [formGroup]="dataForm" (ngSubmit)="updateData()" class="userDialogForm">
+
+    <mat-icon aria-hidden="false" class="titleIcon" fontIcon="person"></mat-icon>
+    <h2>Data account</h2>
+
+    <mat-form-field>
+        <mat-label>Enter your name</mat-label>
+        <input matInput placeholder="Fulano" formControlName="name" required>
+        <mat-error *ngIf="dataForm.get('name')?.hasError('required')">Name is required!</mat-error>
+    </mat-form-field>
+
+    <mat-form-field>
+        <mat-label>Enter your email</mat-label>
+        <input matInput placeholder="pat@example.com" formControlName="email" required>
+        <mat-error *ngIf="dataForm.get('email')?.hasError('required')">Email is required!</mat-error>
+        <mat-error *ngIf="dataForm.get('email')?.hasError('email')">Email is invalid!</mat-error>
+    </mat-form-field>
+
+    <div class="actions">
+
+        <button type="submit" mat-raised-button color="accent" style="margin: 10px;">
+            <span *ngIf="!isLoading">Update data</span>
+            <mat-progress-spinner *ngIf="isLoading" color="primary" style="width: 20px; height: 20px;"
+                mode="indeterminate" value="30">
+            </mat-progress-spinner>
+        </button>
+
+        <button mat-raised-button mat-dialog-close color="warn">Cancel</button>
+
+    </div>
+
+</form>

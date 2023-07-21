@@ -1,0 +1,23 @@
+<mat-dialog-content>
+
+  <p>
+    <input class="title" placeholder="Title to annotation" [(ngModel)]="annotation.title">
+  </p>
+
+  <p>
+    <textarea rows="12" class="description" placeholder="Description to annotation"
+      [(ngModel)]="annotation.description"></textarea>
+  </p>
+
+  <p>
+    <mat-checkbox [(ngModel)]="annotation.isImportant">Is important</mat-checkbox>
+  </p>
+
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onNoClick()">Cancel</button>
+  <button mat-button (click)="saveAnnotation()" cdkFocusInitial>
+    <span >Save</span>
+  </button>
+</mat-dialog-actions>

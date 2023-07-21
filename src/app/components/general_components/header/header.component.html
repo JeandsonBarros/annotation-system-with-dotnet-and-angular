@@ -1,0 +1,64 @@
+<mat-toolbar color="primary" class="mat-elevation-z6">
+
+    <a routerLink="/" class="logo">
+        <span class="nameSystem"> Annotations </span>
+        <mat-icon>edit_note</mat-icon>
+    </a>
+
+    <input *ngIf="isLoggedIn" [value]="search" placeholder="Search annotation"
+        (keyup)="searchAnnotation($event)" class="searchBigScreen">
+
+    <div>
+
+        <button mat-icon-button class="showSearch" (click)="isVisibleSmallSearch = !isVisibleSmallSearch"
+            *ngIf="isLoggedIn">
+            <mat-icon>{{isVisibleSmallSearch? "search_off" : "search"}}</mat-icon>
+        </button>
+
+        <button mat-icon-button *ngIf="isLoggedIn" [matMenuTriggerFor]="menu">
+            <mat-icon>person</mat-icon>
+        </button>
+        <mat-menu #menu="matMenu">
+
+            <button 
+                class="userData" 
+                *ngIf="userLogged" 
+                (click)="updateDataUser()" 
+                mat-menu-item
+                title="Click to view and update account data"
+            >
+                <p> <mat-icon fontIcon="person"></mat-icon> <span>Account data</span></p>
+                <small> {{userLogged.email}} </small>
+            </button>
+
+            <button (click)="updatePasswordUser()" mat-menu-item title="Click to update password">
+                <mat-icon aria-hidden="false" class="titleIcon" fontIcon="password"></mat-icon> Scurity account
+            </button>
+
+            <button (click)="deleteUser()" mat-menu-item title="Click to remove account">
+                <mat-icon aria-hidden="false" class="titleIcon" fontIcon="close"></mat-icon> Remove account
+            </button>
+
+            <button *ngIf="userLogged && userLogged.roles.includes('ADMIN')" routerLink="/auth/manage-users"
+                mat-menu-item>
+                <mat-icon> group </mat-icon>
+                Manage users
+            </button>
+
+            <button mat-menu-item color="warn" (click)="logout()">
+                <mat-icon> logout </mat-icon>
+                Logout
+            </button>
+
+        </mat-menu>
+
+        <button title="Toggle theme" (click)="toggleTheme()" mat-icon-button>
+            <mat-icon>{{isDark? "dark_mode" : "sunny"}}</mat-icon>
+        </button>
+
+    </div>
+
+</mat-toolbar>
+
+<input *ngIf="isLoggedIn && isVisibleSmallSearch" [value]="search" placeholder="Search annotation"
+    (keyup)="searchAnnotation($event)" class="searchSmallScreen">

@@ -1,0 +1,17 @@
+<div class="containerAnnotations" *ngIf="annotations">
+
+    <p>{{titleList || 'Annotations'}}</p>
+    <hr>
+
+    <div class="annotations">
+        <p *ngIf="annotations.length === 0">It is not an annotation.</p>
+        <app-annotation-card 
+            *ngFor='let annotation of annotations' 
+            [annotation]='annotation'
+            (deleteAnnotation)="deleteAnnotation($event)"
+            (updateAnnotation)="update($event)"
+        >
+        </app-annotation-card>
+    </div>
+
+</div>

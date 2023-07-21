@@ -1,0 +1,37 @@
+.annotationCard {
+    background-color: var(--basic);
+    width: 200px;
+    border-radius: 5px;
+    padding: 10px;
+    box-shadow: 3px 3px 24px rgba(0, 0, 0, 0.192);
+    border: 1px solid rgba(128, 128, 128, 0.356);
+    transition: border 200ms ease;
+
+    p{
+        width: 100%;
+    }
+
+    small{
+        color: gray;
+    }
+}
+
+.annotationCard:hover {
+    border: 1px solid var(--primary);
+}
+
+.headerCard {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    width: 100%;
+
+    mat-icon {
+        cursor: pointer;
+        z-index: 999;
+    }
+
+    mat-icon:hover {
+        color: var(--warn);
+    }
+}

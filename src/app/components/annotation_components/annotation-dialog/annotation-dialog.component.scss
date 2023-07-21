@@ -1,0 +1,17 @@
+.title, .description{
+    background-color: transparent;
+    outline: none;
+    border: none;
+    color: var(--color);
+    width: 100%;
+}
+
+.title{
+    font-size: 20px;
+}
+
+.description{
+    font-size: 15px;
+    background-color: rgba(128, 128, 128, 0.075);
+}
+

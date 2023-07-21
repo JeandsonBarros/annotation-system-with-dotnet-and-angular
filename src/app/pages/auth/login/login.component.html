@@ -1,0 +1,38 @@
+<div class="container_form">
+
+    <form [formGroup]="loginForm" (ngSubmit)="login()">
+
+        <mat-icon aria-hidden="false" class="personIcon" fontIcon="person"></mat-icon>
+
+        <h1>Login</h1>
+
+        <mat-form-field>
+            <mat-label>Enter your email</mat-label>
+            <input matInput placeholder="pat@example.com" formControlName="email" required>
+            <mat-error *ngIf="loginForm.get('email')?.hasError('required')">Email is required!</mat-error>
+            <mat-error *ngIf="loginForm.get('email')?.hasError('email')">Email is invalid!</mat-error>
+        </mat-form-field>
+
+        <mat-form-field>
+            <mat-label>Password</mat-label>
+            <input [type]="hidePassword ? 'password' : 'text'" matInput placeholder="password123"
+                formControlName="password" required>
+            <button mat-icon-button type="button" matSuffix (click)="hidePassword = !hidePassword">
+                <mat-icon>{{hidePassword ? 'visibility_off' : 'visibility'}}</mat-icon>
+            </button>
+            <mat-error *ngIf="loginForm.get('password')?.hasError('required')">Password is required!</mat-error>
+            <mat-hint><a routerLink="/auth/forgotten-password">Forgot password?</a></mat-hint>
+        </mat-form-field>
+
+        <button type="submit" mat-raised-button color="primary" style="margin: 10px;" (click)="login()">
+            <span *ngIf="!isLoading">Login</span>
+            <mat-progress-spinner *ngIf="isLoading" color="accent" style="width: 20px; height: 20px;"
+                mode="indeterminate" value="30">
+            </mat-progress-spinner>
+        </button>
+
+        <a routerLink="/auth/register">Or register</a>
+
+    </form>
+
+</div>

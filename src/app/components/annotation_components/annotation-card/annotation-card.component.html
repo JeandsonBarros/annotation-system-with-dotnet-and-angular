@@ -1,0 +1,8 @@
+<div class="annotationCard" *ngIf="annotation">
+    <div class="headerCard">
+        <h3 title="Click for more details" (click)="openDialog()">{{annotation.title.length <= 15 ? annotation.title : annotation.title.slice(0,15)+'...'}}</h3>
+        <mat-icon (click)="deleteAnnotatonClick()" title="delete note"> cancel </mat-icon>
+    </div>
+    <p title="Click for more details" (click)="openDialog()">{{annotation.description.length<=100 ? annotation.description : annotation.description.slice(0, 100)+'...'}}</p>
+    <small>{{annotation.date | date: 'MM/dd/yyyy'}}</small>
+</div>

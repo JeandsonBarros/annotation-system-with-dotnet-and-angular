@@ -1,0 +1,25 @@
+footer {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    border-top: 1px solid rgba(184, 184, 184, 0.37);
+    height: 40px;
+    padding: 10px;
+
+}
+
+footer svg {
+    margin: 5px;
+    width: 20px;
+    height: 20px;
+}
+
+footer a {
+    cursor: pointer;
+    color: var(--accent);
+    :hover {
+        color: var(--primary);
+    }
+}

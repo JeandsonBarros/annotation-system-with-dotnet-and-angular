@@ -1,0 +1,52 @@
+<div class="container_form">
+
+    <form [formGroup]="registerForm" (ngSubmit)="register()">
+
+        <mat-icon aria-hidden="false" class="personIcon" fontIcon="person"></mat-icon>
+
+        <h1>Register</h1>
+
+        <mat-form-field>
+            <mat-label>Enter your name</mat-label>
+            <input matInput placeholder="Fulano" formControlName="name" required>
+            <mat-error *ngIf="registerForm.get('name')?.hasError('required')">Name is required!</mat-error>
+        </mat-form-field>
+
+        <mat-form-field>
+            <mat-label>Enter your email</mat-label>
+            <input matInput placeholder="pat@example.com" formControlName="email" required>
+            <mat-error *ngIf="registerForm.get('email')?.hasError('required')">Email is required!</mat-error>
+            <mat-error *ngIf="registerForm.get('email')?.hasError('email')">Email is invalid!</mat-error>
+        </mat-form-field>
+
+        <mat-form-field>
+            <mat-label>Enter your password</mat-label>
+            <input [type]="hidePassword ? 'password' : 'text'" matInput placeholder="password123" formControlName="password" required>
+            <button mat-icon-button type="button" matSuffix (click)="hidePassword = !hidePassword">
+                <mat-icon>{{hidePassword ? 'visibility_off' : 'visibility'}}</mat-icon>
+            </button>
+            <mat-error *ngIf="registerForm.get('password')?.hasError('required')">Password is required!</mat-error>
+        </mat-form-field>
+
+        <mat-form-field>
+            <mat-label>Confirm password</mat-label>
+            <input [type]="hideConfirmPassword ? 'password' : 'text'" matInput placeholder="password123" formControlName="confirmPassword" required>
+            <button mat-icon-button type="button" matSuffix (click)="hideConfirmPassword = !hideConfirmPassword">
+                <mat-icon>{{hideConfirmPassword ? 'visibility_off' : 'visibility'}}</mat-icon>
+            </button>
+            <mat-error *ngIf="registerForm.get('confirmPassword')?.hasError('required')">Comfirm password is
+                required!</mat-error>
+            <mat-error *ngIf="registerForm.get('confirmPassword')?.value">{{passwordsAreTheSame()}}</mat-error>
+        </mat-form-field>
+
+        <button type="submit" mat-raised-button color="accent" style="margin: 10px;">
+            <span *ngIf="!isLoading">Register</span>
+            <mat-progress-spinner *ngIf="isLoading" color="primary" style="width: 20px; height: 20px;"
+                mode="indeterminate" value="30">
+            </mat-progress-spinner>
+        </button>
+
+        <a routerLink="/auth/login">Or Login</a>
+
+    </form>
+</div>

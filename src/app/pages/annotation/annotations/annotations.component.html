@@ -1,0 +1,42 @@
+<mat-progress-bar *ngIf="isLoading" class="example-margin" color="accent" mode="indeterminate" value="50">
+</mat-progress-bar>
+
+<app-list-annotations 
+    *ngIf="importantAnnotations" 
+    titleList="Important" 
+    [annotations]="importantAnnotations" 
+    (updateAnnotation)="updateAnnotation($event)"
+>
+</app-list-annotations>
+<button 
+    *ngIf="!(paginationImportantAnnotations.pageNumber === paginationImportantAnnotations.totalPages)" 
+    (click)="getImportantAnnotations(paginationImportantAnnotations.pageNumber+1)" 
+    mat-button 
+    color="primary"
+    title="Show more"
+    class="paginationButton"
+>
+    <mat-icon> expand_more </mat-icon>
+</button>
+
+<app-list-annotations 
+    *ngIf="notImportantAnnotations" 
+    titleList="Others"   
+    [annotations]="notImportantAnnotations"
+    (updateAnnotation)="updateAnnotation($event)"
+>
+</app-list-annotations>
+<button 
+    *ngIf="!(paginationNotImportantAnnotations.pageNumber === paginationNotImportantAnnotations.totalPages)" 
+    (click)="getImportantAnnotations(paginationNotImportantAnnotations.pageNumber+1)" 
+    mat-button 
+    color="primary"
+    title="Show more"
+    class="paginationButton"
+>
+    <mat-icon> expand_more </mat-icon>
+</button>
+
+<button (click)="openDialogAddAnnotation()" mat-fab color="primary" title="Add new annotation" class="buttonAddAnnotation">
+    <mat-icon>add</mat-icon>
+</button>

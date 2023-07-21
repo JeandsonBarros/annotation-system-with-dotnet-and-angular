@@ -1,6 +1,19 @@
-# AnnotationsFront
+<div>
+  <img src="https://img.shields.io/badge/Angular-DD0031?style=for-the-badge&logo=angular&logoColor=white" />
+  <img src="https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white" />
+  <img src="https://img.shields.io/badge/JWT-000000?style=for-the-badge&logo=JSON%20web%20tokens&logoColor=white"/>
+  <img src="https://img.shields.io/badge/json-5E5C5C?style=for-the-badge&logo=json&logoColor=white"/>
+  <img src="https://img.shields.io/badge/Sass-CC6699?style=for-the-badge&logo=sass&logoColor=white"/>
+</div>
 
+# AnnotationsFront
+App developed for annotations management.
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 16.1.4.
+
+<img src="./screenshots/demo.gif"/>
+
+## Install depedences
+`npm install` or `npm i`
 
 ## Development server
 
