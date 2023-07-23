@@ -3,10 +3,14 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
+using AnnotationsAPI.Models;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 
 namespace AnnotationsAPI.DTOs
 {
+    /// <summary> 
+    /// Object model for when fields need to be validated.
+    /// </summary>
     public class UserDto
     {
         [Required(ErrorMessage = "Name is required!")]
@@ -20,13 +24,25 @@ namespace AnnotationsAPI.DTOs
         public string Password { get; set; }
     }
 
+    /// <summary> 
+    /// Object model for when fields don't need to be validated. 
+    /// </summary>
     [ValidateNever]
-    public class UserDtoViewModel
+    public class UserDtoNotValidate
     {
         public string Name { get; set; }
-        
+
         public string Email { get; set; }
 
         public string Password { get; set; }
+    }
+
+    /// <summary> 
+    /// Object model for when data for one or more users needs to be returned. 
+    /// </summary>
+    public class UserDtoResponse : UserDtoNotValidate
+    {
+        public string Id { get; set; }
+        public IList<string> Roles { get; set; }
     }
 }

@@ -10,5 +10,6 @@ namespace AnnotationsAPI.Models
     {
         public string Name { get; set;}
         public IList<Annotation> Annotations { get; } = new List<Annotation>();
+        
     }
 }

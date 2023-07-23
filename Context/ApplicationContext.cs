@@ -13,15 +13,9 @@ namespace AnnotationsAPI.Context
     public class ApplicationContext : IdentityDbContext<UserAplication>
     {
         public ApplicationContext(DbContextOptions<ApplicationContext> options) : base(options) { }
-
-        /* protected override void OnModelCreating(ModelBuilder builder)
-        //https://learn.microsoft.com/en-us/ef/core/saving/cascade-delete
-        {
-            base.OnModelCreating(builder);
-        } */
-
-        public DbSet<Annotation> Annotation { get; set; }
-        public DbSet<AuthorizationCode> AuthorizationCode { get; set; }
+    
+        public DbSet<Annotation> Annotations { get; set; }
+        public DbSet<AuthorizationCode> AuthorizationCodes { get; set; }
 
     }
 }

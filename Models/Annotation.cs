@@ -9,10 +9,12 @@ namespace AnnotationsAPI.Models
     public class Annotation
     {
         public long Id { get; set; }
-        public string Title { get; set; }
+        public string? Title { get; set; }
         public string Description { get; set; }
-        
-        [JsonIgnore]
+        public bool IsImportant { get; set; }
+        public DateTime Date { get; } = DateTime.Now;
+
+/*         [JsonIgnore] */
         public string UserAplicationId { get; set; }
         [JsonIgnore]
         public UserAplication User { get; set; }

@@ -80,27 +80,31 @@ namespace AnnotationsAPI.Controllers
                 if (!result.Succeeded)
                 {
                     Console.WriteLine(result.Errors);
-                    return StatusCode(StatusCodes.Status500InternalServerError, new { Message = "Error creating user", result.Errors });
+                    string errorMessage = "Error creating user.";
+                    foreach (var erro in result.Errors)
+                    {
+                        errorMessage += " " + erro.Description;
+                    }
+                    return StatusCode(StatusCodes.Status500InternalServerError, new { Message = errorMessage });
                 }
 
-                if (!await _roleManager.RoleExistsAsync("Admin"))
+                if (!await _roleManager.RoleExistsAsync("USER"))
                 {
-                    await _roleManager.CreateAsync(new("Admin"));
+                    await _roleManager.CreateAsync(new("USER"));
                 }
 
-                await _userManager.AddToRoleAsync(user, "Admin");
+                await _userManager.AddToRoleAsync(user, "USER");
 
                 user.PasswordHash = "";
                 user.SecurityStamp = "";
                 user.ConcurrencyStamp = "";
 
                 return Created(nameof(LoginAsync), user);
-
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
-                return StatusCode(StatusCodes.Status500InternalServerError, new { Message = "Error registering user!" });
+                return StatusCode(StatusCodes.Status500InternalServerError, new { Message = "Error registering user!", Description = ex.Message });
             }
         }
 
@@ -120,7 +124,7 @@ namespace AnnotationsAPI.Controllers
                 if (user is not null && await _userManager.CheckPasswordAsync(user, userDto.Password))
                 {
                     string token = await GetTokenAsync(user);
-                    return Ok(new { Data = token });
+                    return Ok(new { Message = $"Bearer {token}" });
                 }
                 else if (user == null)
                 {
@@ -141,19 +145,21 @@ namespace AnnotationsAPI.Controllers
         /// <response code="401"> If not authenticated </response>
         [Authorize]
         [HttpGet("account-data")]
-        public async Task<ActionResult<UserAplication>> GetAccountData()
+        public async Task<ActionResult<UserDtoResponse>> GetAccountData()
         {
             try
             {
                 var id = User?.Identity?.Name;
                 var user = await _userManager.FindByIdAsync(id);
                 var userRoles = await _userManager.GetRolesAsync(user);
+                UserDtoResponse userDtoResponse = new UserDtoResponse();
 
-                user.PasswordHash = "";
-                user.SecurityStamp = "";
-                user.ConcurrencyStamp = "";
+                userDtoResponse.Email = user.Email;
+                userDtoResponse.Name = user.Name;
+                userDtoResponse.Id = user.Id;
+                userDtoResponse.Roles = userRoles;
 
-                return Ok(user);
+                return Ok(userDtoResponse);
             }
             catch (Exception ex)
             {
@@ -172,14 +178,14 @@ namespace AnnotationsAPI.Controllers
         {
             try
             {
-                UserDtoViewModel userDtoViewModel = new()
+                UserDtoNotValidate userDtoNotValidate = new()
                 {
                     Email = userDto.Email,
                     Name = userDto.Name,
                     Password = userDto.Password
                 };
-
-                var user = await UpdateUser(userDtoViewModel);
+                var id = User?.Identity?.Name;
+                var user = await UpdateUser(userDtoNotValidate, id);
 
                 return Ok(user);
             }
@@ -200,11 +206,12 @@ namespace AnnotationsAPI.Controllers
         /// <response code="400"> If any fields are missing or invalid </response>
         [Authorize]
         [HttpPatch("account-update")]
-        public async Task<IActionResult> PatchUpdateAccount([FromBody] UserDtoViewModel userDtoViewModel)
+        public async Task<IActionResult> PatchUpdateAccount([FromBody] UserDtoNotValidate userDtoNotValidate)
         {
             try
             {
-                await UpdateUser(userDtoViewModel);
+                var id = User?.Identity?.Name;
+                await UpdateUser(userDtoNotValidate, id);
                 return Ok(new { message = "Update success" });
             }
             catch (BadHttpRequestException ex)
@@ -215,101 +222,6 @@ namespace AnnotationsAPI.Controllers
             {
                 Console.WriteLine(ex.Message);
                 return StatusCode(StatusCodes.Status500InternalServerError, new { Message = "Error updating account!" });
-            }
-        }
-
-        /// <summary> Admin: Get all users </summary>
-        /// <returns> Return a page of users </returns>
-        /// <response code="401"> if unauthenticated </response>
-        /// <response code="403"> if non-admin  </response>
-        [Authorize(Roles = "Admin")]
-        [HttpGet("list-all-users")]
-        public ActionResult<PageResponse<List<UserAplication>>> GetAllUsers([FromQuery] Pagination pagination)
-        {
-            try
-            {
-                var validPagination = new Pagination(pagination.Page, pagination.Size);
-
-                var users = _userManager.Users
-                    .Skip((validPagination.Page - 1) * validPagination.Size)
-                    .Take(validPagination.Size)
-                    .ToList();
-
-                foreach (var user in _userManager.Users)
-                {
-                    user.PasswordHash = "";
-                    user.SecurityStamp = "";
-                    user.ConcurrencyStamp = "";
-                }
-
-                var usersSelect = users;
-
-                var TotalRecords = _userManager.Users.Count();
-
-                string baseUri = $"{Request.Scheme}://{Request.Host}/api/auth/list-all-users";
-
-                PageResponse<List<UserAplication>> pagedResponse = new(
-                    data: users,
-                    page: validPagination.Page,
-                    size: validPagination.Size,
-                    totalRecords: TotalRecords,
-                    uri: baseUri
-                );
-
-                return Ok(pagedResponse);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-                return StatusCode(StatusCodes.Status500InternalServerError, new { Message = "Error geting users!" });
-            }
-        }
-
-        /// <summary> Admin: Find user by email </summary>
-        /// <returns> Return a page of users </returns>
-        /// <response code="401"> if unauthenticated </response>
-        /// <response code="403"> if non-admin  </response>
-        [Authorize(Roles = "Admin")]
-        [HttpGet("find-user-by-email/{email}")]
-        public ActionResult<PageResponse<List<UserAplication>>> FindUserByEmail([FromQuery] Pagination pagination, string email)
-        {
-            try
-            {
-                var validPagination = new Pagination(pagination.Page, pagination.Size);
-
-                var users = _userManager.Users
-                    .Where(user => user.Email.Contains(email))
-                    .Skip((validPagination.Page - 1) * validPagination.Size)
-                    .Take(validPagination.Size)
-                    .ToList();
-
-                foreach (var user in _userManager.Users)
-                {
-                    user.PasswordHash = "";
-                    user.SecurityStamp = "";
-                    user.ConcurrencyStamp = "";
-                }
-
-                var usersSelect = users;
-
-                var TotalRecords = _userManager.Users.Where(user => user.Email.Contains(email)).Count();
-
-                string baseUri = $"{Request.Scheme}://{Request.Host}/api/auth/find-user-by-email/{email}";
-
-                PageResponse<List<UserAplication>> pagedResponse = new(
-                    data: users,
-                    page: validPagination.Page,
-                    size: validPagination.Size,
-                    totalRecords: TotalRecords,
-                    uri: baseUri
-                );
-
-                return Ok(pagedResponse);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-                return StatusCode(StatusCodes.Status500InternalServerError, new { Message = "Error geting users!" });
             }
         }
 
@@ -324,16 +236,15 @@ namespace AnnotationsAPI.Controllers
             try
             {
                 var id = User?.Identity?.Name;
-
                 var user = await _userManager.FindByIdAsync(id);
+
                 await _userManager.DeleteAsync(user);
 
                 return NoContent();
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
-                return StatusCode(StatusCodes.Status500InternalServerError, new { Message = "Error deleting account!" });
+                return StatusCode(StatusCodes.Status500InternalServerError, new { Message = "Error deleting account!", Description = ex.Message });
             }
         }
 
@@ -360,7 +271,7 @@ namespace AnnotationsAPI.Controllers
                     Code = code,
                     UserAplicationId = user.Id
                 };
-                _applicationContext.AuthorizationCode.Add(authorizationCode);
+                _applicationContext.AuthorizationCodes.Add(authorizationCode);
                 _applicationContext.SaveChanges();
 
                 bool isSent = await SendEmailAsync(
@@ -379,7 +290,7 @@ namespace AnnotationsAPI.Controllers
                     });
                 }
 
-                _applicationContext.AuthorizationCode.Remove(authorizationCode);
+                _applicationContext.AuthorizationCodes.Remove(authorizationCode);
                 _applicationContext.SaveChanges();
 
                 return StatusCode(
@@ -419,7 +330,7 @@ namespace AnnotationsAPI.Controllers
                     return NotFound(new { Message = $"Email user {changeForgottenPasswordDto.Email} not found!" });
                 }
 
-                var codeForChangeForgottenPassword = _applicationContext.AuthorizationCode
+                var codeForChangeForgottenPassword = _applicationContext.AuthorizationCodes
                                                     .Where(x => x.Code == changeForgottenPasswordDto.Code
                                                      && x.UserAplicationId == user.Id).FirstOrDefault();
                 if (codeForChangeForgottenPassword == null)
@@ -429,7 +340,7 @@ namespace AnnotationsAPI.Controllers
 
                 if (DateTime.UtcNow > codeForChangeForgottenPassword.CodeExpires)
                 {
-                    _applicationContext.AuthorizationCode.Remove(codeForChangeForgottenPassword);
+                    _applicationContext.AuthorizationCodes.Remove(codeForChangeForgottenPassword);
                     _applicationContext.SaveChanges();
 
                     return StatusCode(
@@ -465,6 +376,219 @@ namespace AnnotationsAPI.Controllers
                         Description = ex.Message
                     });
 
+            }
+        }
+
+        /// <summary> Admin: Get all users </summary>
+        /// <returns> Return a page of users </returns>
+        /// <response code="401"> if unauthenticated </response>
+        /// <response code="403"> if non-admin  </response>
+        [Authorize(Roles = "ADMIN")]
+        [HttpGet("list-all-users")]
+        public async Task<ActionResult<PageResponse<List<UserDtoResponse>>>> GetAllUsers([FromQuery] Pagination pagination)
+        {
+            try
+            {
+                var validPagination = new Pagination(pagination.Page, pagination.Size);
+
+                var users = _userManager.Users
+                    .Skip((validPagination.Page - 1) * validPagination.Size)
+                    .Take(validPagination.Size)
+                    .ToList();
+
+                List<UserDtoResponse> usersResponse = new List<UserDtoResponse>();
+
+                foreach (var user in users)
+                {
+                    UserDtoResponse userDtoResponse = new UserDtoResponse();
+                    var userRoles = await _userManager.GetRolesAsync(user);
+                    userDtoResponse.Email = user.Email;
+                    userDtoResponse.Name = user.Name;
+                    userDtoResponse.Id = user.Id;
+                    userDtoResponse.Roles = userRoles;
+                    usersResponse.Add(userDtoResponse);
+                }
+
+                var totalRecords = _userManager.Users.Count();
+
+                string baseUri = $"{Request.Scheme}://{Request.Host}/api/auth/list-all-users";
+
+                PageResponse<List<UserDtoResponse>> pagedResponse = new(
+                    data: usersResponse,
+                    page: validPagination.Page,
+                    size: validPagination.Size,
+                    totalRecords: totalRecords,
+                    uri: baseUri
+                );
+
+                return Ok(pagedResponse);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, new { Message = "Error geting users!", Description = ex.Message });
+            }
+        }
+
+        /// <summary> Admin: Find user by email </summary>
+        /// <returns> Return a page of users </returns>
+        /// <response code="401"> if unauthenticated </response>
+        /// <response code="403"> if non-admin  </response>
+        [Authorize(Roles = "ADMIN")]
+        [HttpGet("find-user-by-email/{email}")]
+        public async Task<ActionResult<PageResponse<List<UserDtoResponse>>>> FindUserByEmail([FromQuery] Pagination pagination, string email)
+        {
+            try
+            {
+                var validPagination = new Pagination(pagination.Page, pagination.Size);
+
+                var users = _userManager.Users
+                    .Where(user => user.Email.Contains(email))
+                    .Skip((validPagination.Page - 1) * validPagination.Size)
+                    .Take(validPagination.Size)
+                    .ToList();
+
+                List<UserDtoResponse> usersResponse = new List<UserDtoResponse>();
+
+                foreach (var user in users)
+                {
+                    UserDtoResponse userDtoResponse = new UserDtoResponse();
+                    var userRoles = await _userManager.GetRolesAsync(user);
+                    userDtoResponse.Email = user.Email;
+                    userDtoResponse.Name = user.Name;
+                    userDtoResponse.Id = user.Id;
+                    userDtoResponse.Roles = userRoles;
+                    usersResponse.Add(userDtoResponse);
+                }
+
+                var totalRecords = _userManager.Users.Where(user => user.Email.Contains(email)).Count();
+
+                string baseUri = $"{Request.Scheme}://{Request.Host}/api/auth/find-user-by-email/{email}";
+
+                PageResponse<List<UserDtoResponse>> pagedResponse = new(
+                    data: usersResponse,
+                    page: validPagination.Page,
+                    size: validPagination.Size,
+                    totalRecords: totalRecords,
+                    uri: baseUri
+                );
+
+                return Ok(pagedResponse);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, new { Message = "Error geting users!" });
+            }
+        }
+
+        /// <summary> Admin delete a user </summary>
+        /// <response code="204"> If user deleted success </response>
+        /// <response code="401"> if unauthenticated </response>
+        /// <response code="403"> if non-admin  </response>
+        [Authorize(Roles = "ADMIN")]
+        [HttpDelete("delete-a-user/{userEmail}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        public async Task<IActionResult> DeleteAUser(string userEmail)
+        {
+            try
+            {
+                var user = await _userManager.FindByEmailAsync(userEmail);
+                if (user == null)
+                {
+                    return NotFound(new { Message = $"User {userEmail} not found" });
+                }
+
+                var roles = await _userManager.GetRolesAsync(user);
+                if (roles.Any(role => role == "ADMIN"))
+                {
+                    return StatusCode(StatusCodes.Status400BadRequest, new { Message = "An admin cannot delete another admin." });
+                }
+
+                await _userManager.DeleteAsync(user);
+
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new { Message = "Error deleting user!", Description = ex.Message });
+            }
+        }
+
+        /// <summary> Admin fully updates a user's data </summary>
+        /// <returns> Returns updated user data </returns>
+        /// <response code="401"> if unauthenticated </response>
+        /// <response code="403"> if non-admin  </response>
+        /// <response code="400"> If any fields are missing or invalid </response>
+        [Authorize(Roles = "ADMIN")]
+        [HttpPut("update-a-user/{userEmail}")]
+        public async Task<ActionResult<UserAplication>> PutUpdateAUser(string userEmail, [FromBody] UserDto userDto)
+        {
+            try
+            {
+                var user = await _userManager.FindByEmailAsync(userEmail);
+                if (user == null)
+                {
+                    return NotFound(new { Message = $"User {userEmail} not found" });
+                }
+
+                var roles = await _userManager.GetRolesAsync(user);
+                if (roles.Any(role => role == "Admin"))
+                {
+                    return StatusCode(StatusCodes.Status400BadRequest, new { Message = "An admin cannot update another admin." });
+                }
+
+                UserDtoNotValidate userDtoNotValidate = new()
+                {
+                    Email = userDto.Email,
+                    Name = userDto.Name,
+                    Password = userDto.Password
+                };
+
+                var userUpdated = await UpdateUser(userDtoNotValidate, user.Id);
+
+                return Ok(userUpdated);
+            }
+            catch (BadHttpRequestException ex)
+            {
+                return StatusCode(StatusCodes.Status400BadRequest, new { ex.Message });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, new { Message = "Error updating account!" });
+            }
+        }
+
+        /// <summary> Admin partially updates a user's data </summary>
+        /// <returns> Returns updated user data </returns>
+        /// <response code="401"> if unauthenticated </response>
+        /// <response code="403"> if non-admin  </response>
+        /// <response code="400"> If any fields are missing or invalid </response>
+        [Authorize(Roles = "ADMIN")]
+        [HttpPatch("update-a-user/{userEmail}")]
+        public async Task<IActionResult> PatchUpdateAUser(string userEmail, [FromBody] UserDtoNotValidate userDtoNotValidate)
+        {
+            try
+            {
+                var user = await _userManager.FindByEmailAsync(userEmail);
+                if (user == null)
+                {
+                    return NotFound(new { Message = $"User {userEmail} not found" });
+                }
+
+                var userUpdated = await UpdateUser(userDtoNotValidate, user.Id);
+
+                return Ok(userUpdated);
+            }
+            catch (BadHttpRequestException ex)
+            {
+                return StatusCode(StatusCodes.Status400BadRequest, new { ex.Message });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, new { Message = "Error updating account!" });
             }
         }
 
@@ -526,33 +650,31 @@ namespace AnnotationsAPI.Controllers
         }
 
         /* Function to update the user, used for PutUpdateAccount() and PatchUpdateAccount() */
-        private async Task<UserAplication> UpdateUser(UserDtoViewModel userDtoViewModel)
+        private async Task<UserAplication> UpdateUser(UserDtoNotValidate userDtoNotValidate, string userId)
         {
+            var userLogged = await _userManager.FindByIdAsync(userId);
 
-            var id = User?.Identity?.Name;
-            var userLogged = await _userManager.FindByIdAsync(id);
-
-            if (!userDtoViewModel.Name.IsNullOrEmpty())
+            if (!userDtoNotValidate.Name.IsNullOrEmpty())
             {
-                userLogged.Name = userDtoViewModel.Name;
+                userLogged.Name = userDtoNotValidate.Name;
             }
 
-            if (!userDtoViewModel.Email.IsNullOrEmpty())
+            if (!userDtoNotValidate.Email.IsNullOrEmpty())
             {
                 string strModel = "^([0-9a-zA-Z]([-.\\w]*[0-9a-zA-Z])*@([0-9a-zA-Z][-\\w]*[0-9a-zA-Z]\\.)+[a-zA-Z]{2,9})$";
-                if (!System.Text.RegularExpressions.Regex.IsMatch(userDtoViewModel.Email, strModel))
+                if (!System.Text.RegularExpressions.Regex.IsMatch(userDtoNotValidate.Email, strModel))
                 {
                     throw new BadHttpRequestException("Email must be well-formed");
                 }
 
-                var userExists = await _userManager.FindByEmailAsync(userDtoViewModel.Email);
+                var userExists = await _userManager.FindByEmailAsync(userDtoNotValidate.Email);
                 if (userExists is not null && userExists.Email.ToString() != userLogged.Email)
                 {
-                    throw new BadHttpRequestException($"User with {userDtoViewModel.Email} already exists!");
+                    throw new BadHttpRequestException($"User with {userDtoNotValidate.Email} already exists!");
                 }
 
-                userLogged.Email = userDtoViewModel.Email;
-                userLogged.UserName = userDtoViewModel.Email;
+                userLogged.Email = userDtoNotValidate.Email;
+                userLogged.UserName = userDtoNotValidate.Email;
             }
 
             var resultUpdateData = await _userManager.UpdateAsync(userLogged);
@@ -567,10 +689,10 @@ namespace AnnotationsAPI.Controllers
                 throw new Exception(errorMessage);
             }
 
-            if (!userDtoViewModel.Password.IsNullOrEmpty())
+            if (!userDtoNotValidate.Password.IsNullOrEmpty())
             {
                 var token = await _userManager.GeneratePasswordResetTokenAsync(userLogged);
-                var resultUpdatePassword = await _userManager.ResetPasswordAsync(userLogged, token, userDtoViewModel.Password);
+                var resultUpdatePassword = await _userManager.ResetPasswordAsync(userLogged, token, userDtoNotValidate.Password);
 
                 if (!resultUpdatePassword.Succeeded)
                 {
@@ -586,8 +708,6 @@ namespace AnnotationsAPI.Controllers
             return userLogged;
 
         }
-
-
 
     }
 }

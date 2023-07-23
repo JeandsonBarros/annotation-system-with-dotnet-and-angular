@@ -7,19 +7,14 @@ using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 
 namespace AnnotationsAPI.DTOs
 {
+    [ValidateNever]
     public class AnnotationDto
     {
-        [Required(ErrorMessage = "Title is required!")]
-        public string Title { get; set; }
+        public string? Title { get; set; }
 
-        [Required(ErrorMessage = "Description is required!")]
-        public string Description { get; set; }
+        public string? Description { get; set; }
+
+        public bool? IsImportant { get; set; }
     }
 
-    [ValidateNever]
-    public class AnnotationDtoViewModel
-    {
-        public string Title { get; set; }
-        public string Description { get; set; }
-    }
 }
