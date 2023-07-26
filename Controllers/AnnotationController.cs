@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -211,7 +212,7 @@ namespace AnnotationsAPI.Controllers
         /// <returns> Returns a annotation </returns>
         /// <response code="404"> If annotation not exist </response>
         [HttpGet("{id}")]
-        public ActionResult<Annotation> GetAnnotationById(int id)
+        public ActionResult<Annotation> GetAnnotationById(long id)
         {
             try
             {
@@ -229,7 +230,7 @@ namespace AnnotationsAPI.Controllers
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
-                return StatusCode(StatusCodes.Status500InternalServerError, new { Message = "Error geting annotation!" });
+                return StatusCode(StatusCodes.Status500InternalServerError, new { Message = "Error geting annotation!", Description = ex.Message });
             }
 
         }
@@ -273,10 +274,10 @@ namespace AnnotationsAPI.Controllers
         }
 
         /* Function to update annotation, this function is used by PUT and PATCH */
-        private Annotation UpdateAnnotation(int annotationId, AnnotationDto annotationDto)
+        private Annotation UpdateAnnotation(long annotationId, AnnotationDto annotationDto)
         {
             var userId = User?.Identity?.Name;
-            var annotation =  _applicationContext.Annotations.Find(annotationId);
+            var annotation = _applicationContext.Annotations.Find(annotationId);
 
             if (annotation == null)
             {
@@ -308,7 +309,7 @@ namespace AnnotationsAPI.Controllers
         /// <returns> Returns the updated annotation </returns>
         /// <response code="404"> If annotation not exist </response>
         [HttpPut("{id}")]
-        public ActionResult<Annotation> PutAnnotation(int id, AnnotationDto annotationDto)
+        public ActionResult<Annotation> PutAnnotation(long id, AnnotationDto annotationDto)
         {
             try
             {
@@ -350,7 +351,7 @@ namespace AnnotationsAPI.Controllers
         /// <returns> Returns the updated annotation </returns>
         /// <response code="404"> If annotation not exist </response>
         [HttpPatch("{id}")]
-        public ActionResult<Annotation> PatchAnnotation(int id, AnnotationDto annotationDto)
+        public ActionResult<Annotation> PatchAnnotation(long id, AnnotationDto annotationDto)
         {
             try
             {
@@ -377,7 +378,7 @@ namespace AnnotationsAPI.Controllers
         /// <response code="404"> If annotation not exist </response>
         [HttpDelete("{id}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
-        public IActionResult DeleteAnnotation(int id)
+        public IActionResult DeleteAnnotation(long id)
         {
             try
             {
