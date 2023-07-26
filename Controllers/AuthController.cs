@@ -652,11 +652,11 @@ namespace AnnotationsAPI.Controllers
         /* Function to update the user, used for PutUpdateAccount() and PatchUpdateAccount() */
         private async Task<UserAplication> UpdateUser(UserDtoNotValidate userDtoNotValidate, string userId)
         {
-            var userLogged = await _userManager.FindByIdAsync(userId);
+            var user = await _userManager.FindByIdAsync(userId);
 
             if (!userDtoNotValidate.Name.IsNullOrEmpty())
             {
-                userLogged.Name = userDtoNotValidate.Name;
+                user.Name = userDtoNotValidate.Name;
             }
 
             if (!userDtoNotValidate.Email.IsNullOrEmpty())
@@ -668,16 +668,16 @@ namespace AnnotationsAPI.Controllers
                 }
 
                 var userExists = await _userManager.FindByEmailAsync(userDtoNotValidate.Email);
-                if (userExists is not null && userExists.Email.ToString() != userLogged.Email)
+                if (userExists is not null && userExists.Email.ToString() != user.Email)
                 {
                     throw new BadHttpRequestException($"User with {userDtoNotValidate.Email} already exists!");
                 }
 
-                userLogged.Email = userDtoNotValidate.Email;
-                userLogged.UserName = userDtoNotValidate.Email;
+                user.Email = userDtoNotValidate.Email;
+                user.UserName = userDtoNotValidate.Email;
             }
 
-            var resultUpdateData = await _userManager.UpdateAsync(userLogged);
+            var resultUpdateData = await _userManager.UpdateAsync(user);
 
             if (!resultUpdateData.Succeeded)
             {
@@ -691,8 +691,8 @@ namespace AnnotationsAPI.Controllers
 
             if (!userDtoNotValidate.Password.IsNullOrEmpty())
             {
-                var token = await _userManager.GeneratePasswordResetTokenAsync(userLogged);
-                var resultUpdatePassword = await _userManager.ResetPasswordAsync(userLogged, token, userDtoNotValidate.Password);
+                var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+                var resultUpdatePassword = await _userManager.ResetPasswordAsync(user, token, userDtoNotValidate.Password);
 
                 if (!resultUpdatePassword.Succeeded)
                 {
@@ -701,11 +701,11 @@ namespace AnnotationsAPI.Controllers
                 }
             }
 
-            userLogged.PasswordHash = "";
-            userLogged.SecurityStamp = "";
-            userLogged.ConcurrencyStamp = "";
+            user.PasswordHash = "";
+            user.SecurityStamp = "";
+            user.ConcurrencyStamp = "";
 
-            return userLogged;
+            return user;
 
         }
 

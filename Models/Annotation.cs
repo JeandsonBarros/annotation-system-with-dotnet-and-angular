@@ -13,8 +13,6 @@ namespace AnnotationsAPI.Models
         public string Description { get; set; }
         public bool IsImportant { get; set; }
         public DateTime Date { get; } = DateTime.Now;
-
-/*         [JsonIgnore] */
         public string UserAplicationId { get; set; }
         [JsonIgnore]
         public UserAplication User { get; set; }

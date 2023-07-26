@@ -84,7 +84,7 @@ namespace AnnotationsAPI.Controllers
                     .Take(validPagination.Size)
                     .ToList();
 
-                var TotalRecords = _applicationContext.Annotations
+                var totalRecords = _applicationContext.Annotations
                     .Where(annotation => annotation.Title.Contains(title) && annotation.UserAplicationId == userId)
                     .Count();
 
@@ -94,7 +94,7 @@ namespace AnnotationsAPI.Controllers
                     data: annotations,
                     page: validPagination.Page,
                     size: validPagination.Size,
-                    totalRecords: TotalRecords,
+                    totalRecords: totalRecords,
                     uri: baseUri
                 );
 
@@ -124,7 +124,7 @@ namespace AnnotationsAPI.Controllers
                     .Take(validPagination.Size)
                     .ToList();
 
-                var TotalRecords = _applicationContext.Annotations
+                var totalRecords = _applicationContext.Annotations
                     .Where(annotation => annotation.Description.Contains(description) && annotation.UserAplicationId == userId)
                     .Count();
 
@@ -134,7 +134,7 @@ namespace AnnotationsAPI.Controllers
                     data: annotations,
                     page: validPagination.Page,
                     size: validPagination.Size,
-                    totalRecords: TotalRecords,
+                    totalRecords: totalRecords,
                     uri: baseUri
                 );
 
