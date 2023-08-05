@@ -217,7 +217,9 @@ namespace AnnotationsAPI.Controllers
             try
             {
                 var userId = User?.Identity?.Name;
-                var annotationDataBase = _applicationContext.Annotations.Find(id);
+                var annotationDataBase = _applicationContext.Annotations
+                    .Where(a => a.Id == id && a.UserAplicationId == userId)
+                    .FirstOrDefault();
 
                 if (annotationDataBase == null)
                 {
@@ -277,7 +279,9 @@ namespace AnnotationsAPI.Controllers
         private Annotation UpdateAnnotation(long annotationId, AnnotationDto annotationDto)
         {
             var userId = User?.Identity?.Name;
-            var annotation = _applicationContext.Annotations.Find(annotationId);
+            var annotation = _applicationContext.Annotations
+                .Where(a => a.Id == annotationId && a.UserAplicationId == userId)
+                .FirstOrDefault();
 
             if (annotation == null)
             {
@@ -383,7 +387,9 @@ namespace AnnotationsAPI.Controllers
             try
             {
                 var userId = User?.Identity?.Name;
-                var annotation =  _applicationContext.Annotations.Find(id);
+                var annotation = _applicationContext.Annotations
+                    .Where(annotation => annotation.Id == id && annotation.UserAplicationId == userId)
+                    .FirstOrDefault();
 
                 if (annotation == null)
                 {
